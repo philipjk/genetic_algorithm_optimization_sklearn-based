@@ -6,6 +6,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn import neighbors
 from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
+from sklearn.decomposition import PCA
 
 import numpy as np
 import pandas as pd
@@ -43,22 +44,31 @@ xx = np.linspace(iris.data[:,0].min()-.1,iris.data[:,0].max()+.1,100)
 yy = np.linspace(iris.data[:,1].min()-.1,iris.data[:,1].max()+.1,100)
 XX, YY = np.meshgrid(xx,yy)
 
-for model in [lin_reg,knn,bnb,dtc,pct,svc_rbf,svc_lin,svc_poly,mlp]:
+fig = plt.figure(figsize=(8.5,8.5))
+for ind, model in enumerate([lin_reg,knn,bnb,dtc,pct,svc_rbf,svc_lin,svc_poly,mlp]):
     pred_mesh = model.predict(np.c_[XX.ravel(),YY.ravel()])
 
     # Visualize decision bundaries
-    plt.figure()
     cmap_light = ListedColormap(['#FFAAAA', '#AAFFAA', '#AAAAFF'])
-    plt.pcolormesh(XX, YY, pred_mesh.reshape(XX.shape), cmap=cmap_light)
-    plt.scatter(iris.data[:,0],iris.data[:,1],c=iris.target)
-    plt.xlabel(iris.feature_names[0])
-    plt.ylabel(iris.feature_names[1])
-    plt.title("Scatter plot and decision boundaries, %s model" %model.__class__.__name__)
-    formatter = plt.FuncFormatter(lambda i, *args: iris.target_names[int(i)])
-    plt.colorbar(ticks=[0,1,2],format=formatter)
+    ax = fig.add_subplot(3,3,ind+1)
+    ax.pcolormesh(XX, YY, pred_mesh.reshape(XX.shape), cmap=cmap_light)
+    ax.scatter(iris.data[:,0],iris.data[:,1],c=iris.target)
+    if ind in [6,7,8]:
+        ax.set_xlabel(iris.feature_names[0])
+    if ind in [0,3,6]:
+        ax.set_ylabel(iris.feature_names[1])
+    ax.set_title("%s" %(model.__class__.__name__),fontweight='bold')
+    ax.set_xticks([])
+    ax.set_yticks([])
+   
+#formatter = plt.FuncFormatter(lambda i, *args: iris.target_names[int(i)])
+#plt.colorbar(ticks=[0,1,2],format=formatter)
 
 
-
+fig1 = plt.figure()
+new_data = PCA(n_components=2).fit_transform(iris.data)
+ax = fig1.add_subplot(111)
+ax.scatter(new_data[:,0],new_data[:,1],c=iris.target)
 
 plt.show()
 
